@@ -6,11 +6,14 @@ const client = new Discord.Client();
 
 const commandDir = "./commands";
 const triggerDir = "./triggers";
+const homebrewDir = "./hb";
 
 const commandFiles = fs.readdirSync(commandDir).filter(file => file.endsWith(".js"));
 const triggerFiles = fs.readdirSync(triggerDir).filter(file => file.endsWith(".js"));
+const homebrewFiles = fs.readdirSync(homebrewDir).filter(file => file.endsWith(".js"));
 
 client.commands = new Discord.Collection();
+client.homebrew = new Discord.Collection();
 
 console.log("Loading commands: ");
 for (const file of commandFiles) {
@@ -27,6 +30,12 @@ for (const file of triggerFiles) {
     console.log(`  ${trigger.name}`);
 }
 
+console.log("Loading Homebrew Pages: ");
+for (const file of homebrewFiles) {
+    const homebrew = require(`${homebrewDir}/${file}`);
+    client.homebrew.set(homebrew.name, homebrew);
+    console.log(`  ${homebrew.name}`);
+}
 
 client.once("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -55,15 +64,18 @@ function handleMessage(message) {
     let args = message.content.substring(process.env.PREFIX.length).split(" ");
     let command = args.shift();
 
-    if (!client.commands.has(command)) return;
-
     try {
-        let cmd = client.commands.get(command);
+        let cmd = client.commands.get(command)
+            || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(command));
+
+        if (!cmd) {
+            return message.channel.send("Not a real command");
+        }
 
         if (checkPerms(message, cmd.perms)) {
             cmd.execute(message, args);
         }
-        
+
     } catch (error) {
         console.error(error);
         message.channel.send("There was an error trying to execute that command!");

@@ -1,4 +1,4 @@
-const Discord = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 
 module.exports = {
     name: "help",
@@ -9,7 +9,7 @@ module.exports = {
         if (message.guild.me.client.commands.has(args[0])) {
             let command = message.guild.me.client.commands.get(args[0]);
 
-            let helpEmbed = new Discord.MessageEmbed()
+            let helpEmbed = new MessageEmbed()
                 .setColor(message.member.displayHexColor)
                 .setTitle(command.name.toUpperCase())
                 .setDescription(command.description)
