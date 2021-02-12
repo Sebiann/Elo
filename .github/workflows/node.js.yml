@@ -5,9 +5,9 @@ name: eslint
 
 on:
   push:
-    branches: [ master ]
+    branches: [ telegraf-master ]
   pull_request:
-    branches: [ master ]
+    branches: [ telegraf-master ]
 
 jobs:
   build:
