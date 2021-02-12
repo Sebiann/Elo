@@ -1,0 +1,12 @@
+[Unit]
+Description=Elo Telegram Bot
+After=network-online.target
+
+[Service]
+Type=simple
+User=seb
+Group=seb
+ExecStart=/usr/bin/node /home/seb/bots/Elo-TelegramBot/.
+WorkingDirectory=/home/seb/bots/Elo-TelegramBot/
+[Install]
+WantedBy=default.target

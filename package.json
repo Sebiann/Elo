@@ -1,6 +1,6 @@
 {
   "name": "elo",
-  "version": "0.2.0",
+  "version": "0.1.1",
   "description": "elo",
   "main": "index.js",
   "scripts": {
@@ -20,8 +20,6 @@
   },
   "homepage": "https://github.com/Sebiann/SebDiscordBot#readme",
   "dependencies": {
-    "colors": "^1.4.0",
-    "discord.js": "^12.5.1",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
