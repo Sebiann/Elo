@@ -1,20 +1,55 @@
-const fs = require("fs");
+const fs = require("node:fs");
+const path = require('node:path');
 
-require("dotenv").config();
+const config = require('./config.json');
+// require("dotenv").config();
 const Discord = require("discord.js");
-const client = new Discord.Client();
-
-const commandDir = "./commands";
-const triggerDir = "./triggers";
-const homebrewDir = "./hb";
-
-const commandFiles = fs.readdirSync(commandDir).filter(file => file.endsWith(".js"));
-const triggerFiles = fs.readdirSync(triggerDir).filter(file => file.endsWith(".js"));
-const homebrewFiles = fs.readdirSync(homebrewDir).filter(file => file.endsWith(".js"));
+const client = new Discord.Client({ intents: [Discord.GatewayIntentBits.Guilds] });
 
 client.commands = new Discord.Collection();
 client.homebrew = new Discord.Collection();
 
+const foldersPath = path.join(__dirname, 'commands');
+const commandFolders = fs.readdirSync(foldersPath);
+
+for (const folder of commandFolders) {
+	const commandsPath = path.join(foldersPath, folder);
+	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+	for (const file of commandFiles) {
+		const filePath = path.join(commandsPath, file);
+		const command = require(filePath);
+		if ('data' in command && 'execute' in command) {
+			client.commands.set(command.data.name, command);
+		} else {
+			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+		}
+	}
+}
+
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+for (const file of eventFiles) {
+	const filePath = path.join(eventsPath, file);
+	const event = require(filePath);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args));
+	}
+}
+
+client.login(config.token);
+
+// const commandDir = "./commands";
+// const triggerDir = "./triggers";
+// const homebrewDir = "./hb";
+
+// const commandFiles = fs.readdirSync(commandDir).filter(file => file.endsWith(".js"));
+// const triggerFiles = fs.readdirSync(triggerDir).filter(file => file.endsWith(".js"));
+// const homebrewFiles = fs.readdirSync(homebrewDir).filter(file => file.endsWith(".js"));
+
+/*
 console.log("Loading commands: ");
 for (const file of commandFiles) {
     const command = require(`${commandDir}/${file}`);
@@ -36,18 +71,14 @@ for (const file of homebrewFiles) {
     client.homebrew.set(homebrew.name, homebrew);
     console.log(`  ${homebrew.name}`);
 }
+*/
 
-client.once("ready", () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-    client.user.setPresence({ activity: { name: "DnD", type: "PLAYING" } });
-});
-
+/*
 function handleMessage(message) {
     if (message.author.bot || message.channel.type === "dm") return;
 
-    /**
-     * Triggers
-     */
+    // Triggers
+
     for (const trigger of client.triggers) {
         if (trigger.regex.test(message.content)) {
             if (checkPerms(message, trigger.perms)) {
@@ -57,9 +88,8 @@ function handleMessage(message) {
         }
     }
 
-    /**
-     * Commands
-     */
+    // Commands
+
     if (!message.content.startsWith(process.env.PREFIX)) return;
     let args = message.content.substring(process.env.PREFIX.length).split(" ");
     let command = args.shift();
@@ -92,10 +122,9 @@ client.on("messageUpdate", async (_, newMsg) => {
     if (botMessage) botMessage.delete();
 
     handleMessage(newMsg);
-});
+}); */
 
-client.login(process.env.TOKEN);
-
+/*
 function checkPerms(message, perms) {
     let missingPerms = [];
 
@@ -110,4 +139,4 @@ function checkPerms(message, perms) {
     }
     
     return missingPerms.length === 0;
-}
+} */
